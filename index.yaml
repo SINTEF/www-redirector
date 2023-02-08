@@ -3,6 +3,16 @@ entries:
   www-redirector:
   - apiVersion: v2
     appVersion: 0.1.0
+    created: "2023-02-08T08:09:27.29406711Z"
+    description: A Helm chart for Kubernetes
+    digest: 6a50a7b6411040d85971269042b5c9588e68b62a61070dbb5f9fee7fd75f8702
+    name: www-redirector
+    type: application
+    urls:
+    - https://github.com/SINTEF/www-redirector/releases/download/www-redirector-0.1.1/www-redirector-0.1.1.tgz
+    version: 0.1.1
+  - apiVersion: v2
+    appVersion: 0.1.0
     created: "2023-02-07T18:00:18.866465466Z"
     description: A Helm chart for Kubernetes
     digest: b58159e89abd475a438269e0585946c418eaaa105324195384d96e6f632f118f
@@ -11,4 +21,4 @@ entries:
     urls:
     - https://github.com/SINTEF/www-redirector/releases/download/www-redirector-0.1.0/www-redirector-0.1.0.tgz
     version: 0.1.0
-generated: "2023-02-07T18:00:18.866851868Z"
+generated: "2023-02-08T08:09:27.294080611Z"
