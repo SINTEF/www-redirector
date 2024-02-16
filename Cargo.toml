@@ -4,8 +4,9 @@ version = "0.2.0"
 edition = "2021"
 
 [dependencies]
-hyper = { version = "1.1", features = ["full"] }
+axum = "0.7"
+tracing = { version = "0.1" }
 tokio = { version = "1.36", features = ["full"] }
-http-body-util = "0.1"
-hyper-util = { version = "0.1", features = ["full"] }
-bytes = "1.5"
+tower = { version = "0.4", features = ["full"] }
+tower-http = { version = "0.5", features = ["full"] }
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
