@@ -1,4 +1,4 @@
-FROM rust:1.67.0-alpine as builder
+FROM rust:1.76-alpine as builder
 
 RUN rustup target add x86_64-unknown-linux-musl
 RUN apk add --no-cache musl-dev git
