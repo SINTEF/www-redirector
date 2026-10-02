@@ -1,8 +1,8 @@
+use axum::Router;
 use axum::extract::State;
 use axum::http::StatusCode;
 use axum::http::Uri;
 use axum::response::Redirect;
-use axum::Router;
 use std::env;
 use std::net::SocketAddr;
 use std::sync::Arc;
@@ -11,7 +11,7 @@ use tokio::net::TcpListener;
 use tokio::signal;
 use tower::ServiceBuilder;
 use tower_http::trace;
-use tower_http::{timeout::TimeoutLayer, trace::TraceLayer, ServiceBuilderExt};
+use tower_http::{ServiceBuilderExt, timeout::TimeoutLayer, trace::TraceLayer};
 use tracing::Level;
 
 #[derive(Clone, Debug)]
@@ -55,7 +55,10 @@ async fn main() {
                 .make_span_with(trace::DefaultMakeSpan::new().level(Level::INFO))
                 .on_response(trace::DefaultOnResponse::new().level(Level::INFO)),
         )
-        .layer(TimeoutLayer::new(Duration::from_secs(10)))
+        .layer(TimeoutLayer::with_status_code(
+            StatusCode::REQUEST_TIMEOUT,
+            Duration::from_secs(10),
+        ))
         .compression()
         .into_inner();
 

@@ -4,15 +4,16 @@ A helm chart for [www-redirector](https://github.com/SINTEF/www-redirector).
 
 ## Usage
 
-Install the helm chart repository:
+Install the chart from the OCI registry:
+
+```bash
+helm install www-redirector --set redirectUrl=https://example.net oci://ghcr.io/sintef/charts/www-redirector
+```
+
+Or from the helm chart repository:
 
 ```bash
 helm repo add www-redirector https://sintef.github.io/www-redirector
-```
-
-Install the chart:
-
-```bash
 helm install www-redirector --set redirectUrl=https://example.net www-redirector/www-redirector
 ```
 

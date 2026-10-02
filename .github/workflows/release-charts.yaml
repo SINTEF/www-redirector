@@ -11,10 +11,11 @@ jobs:
     # see: https://docs.github.com/en/actions/security-guides/automatic-token-authentication#modifying-the-permissions-for-the-github_token
     permissions:
       contents: write
+      packages: write
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
@@ -24,9 +25,29 @@ jobs:
           git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
 
       - name: Install Helm
-        uses: azure/setup-helm@v3
+        uses: azure/setup-helm@v5
+
+      - name: Lint chart
+        run: helm lint charts/www-redirector
 
       - name: Run chart-releaser
-        uses: helm/chart-releaser-action@v1.6.0
+        uses: helm/chart-releaser-action@v1
         env:
           CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+
+      # Also publish the chart as an OCI artifact: oci://ghcr.io/<owner>/charts/www-redirector
+      # A chart version is only pushed once, so versions stay immutable.
+      - name: Publish chart to GHCR (OCI)
+        env:
+          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          owner="${GITHUB_REPOSITORY_OWNER,,}"
+          version="$(helm show chart charts/www-redirector | awk '/^version:/ {print $2}')"
+          printf '%s' "$GHCR_TOKEN" | helm registry login ghcr.io --username "$GITHUB_ACTOR" --password-stdin
+          if helm show chart "oci://ghcr.io/$owner/charts/www-redirector" --version "$version" > /dev/null 2>&1; then
+            echo "Chart $version is already published, skipping."
+            exit 0
+          fi
+          mkdir -p dist
+          helm package charts/www-redirector --destination dist
+          helm push dist/www-redirector-*.tgz "oci://ghcr.io/$owner/charts"

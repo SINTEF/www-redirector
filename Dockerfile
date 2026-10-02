@@ -1,35 +1,29 @@
-FROM rust:1.76-alpine as builder
+# Alpine's default Rust target is musl on both amd64 and arm64, so the same
+# Dockerfile produces a static binary on either architecture (build it natively).
+FROM rust:1.99-alpine AS builder
 
-RUN rustup target add x86_64-unknown-linux-musl
-RUN apk add --no-cache musl-dev git
-
-ENV USER=www
-ENV UID=1000
-
-RUN adduser \
-  --disabled-password \
-  --gecos "" \
-  --home "/nonexistent" \
-  --no-create-home \
-  --shell "/sbin/nologin" \
-  --uid "${UID}" \
-  "${USER}"
+RUN apk add --no-cache musl-dev
 
 WORKDIR /app
 
-RUN cargo new www-redirector
-WORKDIR /app/www-redirector
+# Build the dependencies first, so this layer is cached until Cargo.toml/Cargo.lock change.
 COPY Cargo.toml Cargo.lock ./
-RUN cargo fetch --target x86_64-unknown-linux-musl --config net.git-fetch-with-cli=true
+RUN mkdir src \
+    && echo 'fn main() {}' > src/main.rs \
+    && cargo build --release --locked \
+    && rm -rf src
+
 COPY src ./src
-RUN cargo build --release --target x86_64-unknown-linux-musl --config net.git-fetch-with-cli=true
-RUN strip target/x86_64-unknown-linux-musl/release/www-redirector
+RUN touch src/main.rs && cargo build --release --locked
 
 
 FROM scratch
-COPY --from=builder /etc/passwd /etc/passwd
-COPY --from=builder /etc/group /etc/group
-WORKDIR /app
-COPY --from=builder /app/www-redirector/target/x86_64-unknown-linux-musl/release/www-redirector /app/www-redirector
-USER www:www
-CMD ["/app/www-redirector"]
+
+COPY --from=builder /app/target/release/www-redirector /www-redirector
+
+EXPOSE 8080
+
+# Numeric user, so Kubernetes can verify runAsNonRoot without a passwd file.
+USER 10001:10001
+
+ENTRYPOINT ["/www-redirector"]

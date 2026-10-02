@@ -12,9 +12,15 @@ Use the `REDIRECT_URL` environment variable to set the URL to redirect to. The p
 ghcr.io/sintef/www-redirector
 ```
 
+The image is multi-arch (`linux/amd64` and `linux/arm64`).
+
 ### Helm Chart
 
-A Helm chart is available in the [charts/www-redirector](charts/www-redirector/) directory.
+A Helm chart is available in the [charts/www-redirector](charts/www-redirector/) directory, and published as an OCI artifact:
+
+```
+oci://ghcr.io/sintef/charts/www-redirector
+```
 
 ## Why
 
